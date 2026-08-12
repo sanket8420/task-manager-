@@ -8,6 +8,7 @@ stages:
     - build
     - publish
     - test
+    - deploy
 
 building-frontend:
     stage: build 
@@ -35,3 +36,10 @@ publish:
     - docker tag task-manager-frontend:latest "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
     - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"
     - docker push "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
+
+deploying-stage-using-docker-compose:
+    stage: deploy
+    tags:
+        -  task-manager
+    script: 
+        - docker compose up 
