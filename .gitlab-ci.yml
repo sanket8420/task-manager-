@@ -80,4 +80,4 @@ dast:
   variables:
     DAST_WEBSITE: "http://<reachable-host>:8081"
   needs:
-    - deploy
+    - deploying-stage-using-docker-compose
