@@ -38,6 +38,28 @@ publish:
     - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"
     - docker push "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
 
+container_scanning_backend:
+  stage: test
+  tags:
+    - task-manager
+  variables:
+    CS_IMAGE: "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"
+  needs:
+    - publish
+  script:
+    - echo "Scanning backend image"
+
+container_scanning_frontend:
+  stage: test
+  tags:
+    - task-manager
+  variables:
+    CS_IMAGE: "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
+  needs:
+    - publish
+  script:
+    - echo "Scanning frontend image"
+
 deploying-stage-using-docker-compose:
     stage: deploy
     tags:
