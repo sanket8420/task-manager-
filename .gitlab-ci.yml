@@ -3,6 +3,7 @@ include:
     - template: Jobs/Secret-Detection.gitlab-ci.yml
     - template: Jobs/Dependency-Scanning.gitlab-ci.yml
     #- template: Jobs/Container-Scanning.gitlab-ci.yml
+    - template: Security/DAST.gitlab-ci.yml
 
 
 stages:
@@ -10,6 +11,7 @@ stages:
     - publish
     - test
     - deploy
+    - dast
 
 building-frontend:
     stage: build 
@@ -59,6 +61,15 @@ container_scanning_frontend:
     - publish
   script:
     - echo "Scanning frontend image"
+
+dast:
+  stage: dast
+  tags:
+    - task-manager
+  variables:
+    DAST_WEBSITE: "http://<reachable-host>:8081"
+  needs:
+    - deploy
 
 deploying-stage-using-docker-compose:
     stage: deploy
