@@ -11,12 +11,12 @@ services:
             - task-manager
     
     frontend:
-        build: ../frontend
+        image: task-manager-frontend
         networks:
             - task-manager
     
     backend:
-        build : ./backend
+        image: task-manager-backend
         networks: 
             - task-manager
 
