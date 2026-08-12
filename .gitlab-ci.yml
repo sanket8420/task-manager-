@@ -41,5 +41,5 @@ deploying-stage-using-docker-compose:
     stage: deploy
     tags:
         -  task-manager
-    script: 
-        - docker compose up 
+    script:
+        - docker-compose up -d
