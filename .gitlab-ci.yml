@@ -1,5 +1,6 @@
 stages:
     - build
+    - publish
 
 building-frontend:
     stage: build 
@@ -16,3 +17,14 @@ building-backend:
     script:
         - cd backend/
         - docker build -t task-manager-backend .
+
+publish:
+  stage: publish
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    
+    - docker tag task-manager-backend:latest "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"
+    - docker tag task-manager-frontend:latest "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
+    
+    - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"
+    - docker push "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
