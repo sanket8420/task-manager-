@@ -6,7 +6,7 @@ building-frontend:
     tags:
         - task-manager
     script:
-        - cd /frontend
+        - cd frontend/
         - docker build - t task-manager-frontend .
 
 building-backend:
@@ -14,5 +14,5 @@ building-backend:
     tags:
         - task-manager
     script:
-        - cd /backend
+        - cd backend/
         - docker build -t task-manager-backend .
