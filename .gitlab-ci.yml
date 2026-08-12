@@ -1,0 +1,18 @@
+stages:
+    - build
+
+building-frontend:
+    stage: build 
+    tags:
+        - task-manager
+    script:
+        - cd /frontend
+        - docker build - t task-manager-frontend .
+
+building-backend:
+    stage: build 
+    tags:
+        - task-manager
+    script:
+        - cd /backend
+        - docker build -t task-manager-backend .
