@@ -62,14 +62,7 @@ container_scanning_frontend:
   script:
     - echo "Scanning frontend image"
 
-dast:
-  stage: dast
-  tags:
-    - task-manager
-  variables:
-    DAST_WEBSITE: "http://<reachable-host>:8081"
-  needs:
-    - deploy
+
 
 deploying-stage-using-docker-compose:
     stage: deploy
@@ -78,3 +71,13 @@ deploying-stage-using-docker-compose:
     script:
         - docker-compose down 
         - docker-compose up -d
+
+
+dast:
+  stage: dast
+  tags:
+    - task-manager
+  variables:
+    DAST_WEBSITE: "http://<reachable-host>:8081"
+  needs:
+    - deploy
