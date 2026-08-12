@@ -1,6 +1,12 @@
+include:
+    - template: Jobs/SAST.gitlab-ci.yml
+    - template: Jobs/Secret-Detection.gitlab-ci.yml
+
+
 stages:
     - build
     - publish
+    - test
 
 building-frontend:
     stage: build 
