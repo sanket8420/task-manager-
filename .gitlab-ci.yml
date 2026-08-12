@@ -7,7 +7,7 @@ building-frontend:
         - task-manager
     script:
         - cd frontend/
-        - docker build - t task-manager-frontend .
+        - docker build -t task-manager-frontend .
 
 building-backend:
     stage: build 
