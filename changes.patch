@@ -1,0 +1,109 @@
+--- a/backend/app/models.py
++++ b/backend/app/models.py
+@@ -5,6 +5,8 @@
+ 
+ from app.database import Base
+ 
++PRIORITY_LEVELS = ("low", "medium", "high")
++
+ 
+ class User(Base):
+     __tablename__ = "users"
+@@ -24,6 +26,8 @@
+     title = Column(String, nullable=False)
+     description = Column(String, nullable=True)
+     is_completed = Column(Boolean, default=False)
++    priority = Column(String, default="medium", nullable=False)
++    due_date = Column(DateTime, nullable=True)
+     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+ 
+--- a/backend/app/schemas.py
++++ b/backend/app/schemas.py
+@@ -1,7 +1,9 @@
+ import datetime
+ from typing import Optional
+ 
+-from pydantic import BaseModel, EmailStr, ConfigDict
++from pydantic import BaseModel, EmailStr, ConfigDict, field_validator
++
++from app.models import PRIORITY_LEVELS
+ 
+ 
+ # ---- Auth ----
+@@ -31,6 +33,15 @@
+     title: str
+     description: Optional[str] = None
+     is_completed: bool = False
++    priority: str = "medium"
++    due_date: Optional[datetime.datetime] = None
++
++    @field_validator("priority")
++    @classmethod
++    def validate_priority(cls, value: str) -> str:
++        if value not in PRIORITY_LEVELS:
++            raise ValueError(f"priority must be one of {PRIORITY_LEVELS}")
++        return value
+ 
+ 
+ class TaskCreate(TaskBase):
+@@ -41,6 +52,15 @@
+     title: Optional[str] = None
+     description: Optional[str] = None
+     is_completed: Optional[bool] = None
++    priority: Optional[str] = None
++    due_date: Optional[datetime.datetime] = None
++
++    @field_validator("priority")
++    @classmethod
++    def validate_priority(cls, value: Optional[str]) -> Optional[str]:
++        if value is not None and value not in PRIORITY_LEVELS:
++            raise ValueError(f"priority must be one of {PRIORITY_LEVELS}")
++        return value
+ 
+ 
+ class TaskOut(TaskBase):
+--- a/frontend/index.html
++++ b/frontend/index.html
+@@ -3,6 +3,12 @@
+   <head>
+     <meta charset="UTF-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++    <link rel="preconnect" href="https://fonts.googleapis.com" />
++    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
++    <link
++      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
++      rel="stylesheet"
++    />
+     <title>Task Manager</title>
+   </head>
+   <body>
+--- a/frontend/src/main.jsx
++++ b/frontend/src/main.jsx
+@@ -2,12 +2,25 @@
+ import ReactDOM from "react-dom/client";
+ import { BrowserRouter } from "react-router-dom";
+ import App from "./App.jsx";
++import { ToastProvider } from "./components/ToastContext.jsx";
+ import "./index.css";
+ 
++// Apply saved/system theme before first paint to avoid a flash.
++const savedTheme = localStorage.getItem("theme");
++const initialTheme =
++  savedTheme === "light" || savedTheme === "dark"
++    ? savedTheme
++    : window.matchMedia("(prefers-color-scheme: dark)").matches
++    ? "dark"
++    : "light";
++document.documentElement.setAttribute("data-theme", initialTheme);
++
+ ReactDOM.createRoot(document.getElementById("root")).render(
+   <React.StrictMode>
+     <BrowserRouter>
+-      <App />
++      <ToastProvider>
++        <App />
++      </ToastProvider>
+     </BrowserRouter>
+   </React.StrictMode>
+ );

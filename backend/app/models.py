@@ -5,6 +5,8 @@ from sqlalchemy.orm import relationship
 
 from app.database import Base
 
+PRIORITY_LEVELS = ("low", "medium", "high")
+
 
 class User(Base):
     __tablename__ = "users"
@@ -24,6 +26,8 @@ class Task(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
     is_completed = Column(Boolean, default=False)
+    priority = Column(String, default="medium", nullable=False)
+    due_date = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 

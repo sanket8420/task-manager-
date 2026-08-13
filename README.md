@@ -58,7 +58,7 @@ task-manager/
 
 ## Running locally
 
-Requires Docker and Docker Compose.
+    Requires Docker and Docker Compose.
 
 ```bash
 git clone <your-gitlab-repo-url>
