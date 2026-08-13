@@ -8,10 +8,9 @@ include:
 
 stages:
     - build
-    - publish
     - test
+    - publish
     - deploy
-    - dast
 
 building-frontend:
     stage: build 
@@ -40,27 +39,6 @@ publish:
     - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"
     - docker push "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
 
-container_scanning_backend:
-  stage: test
-  tags:
-    - task-manager
-  variables:
-    CS_IMAGE: "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"
-  needs:
-    - publish
-  script:
-    - echo "Scanning backend image"
-
-container_scanning_frontend:
-  stage: test
-  tags:
-    - task-manager
-  variables:
-    CS_IMAGE: "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
-  needs:
-    - publish
-  script:
-    - echo "Scanning frontend image"
 
 
 
@@ -72,12 +50,3 @@ deploying-stage-using-docker-compose:
         - docker-compose down 
         - docker-compose up -d
 
-
-dast:
-  stage: dast
-  tags:
-    - task-manager
-  needs:
-    - deploying-stage-using-docker-compose
-  script:
-    - docker run --network host ...
