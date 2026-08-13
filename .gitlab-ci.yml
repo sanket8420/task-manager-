@@ -1,0 +1,52 @@
+include:
+    - template: Jobs/SAST.gitlab-ci.yml
+    - template: Jobs/Secret-Detection.gitlab-ci.yml
+    - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+    #- template: Jobs/Container-Scanning.gitlab-ci.yml
+    #- template: Security/DAST.gitlab-ci.yml
+
+
+stages:
+    - build
+    - test
+    - publish
+    - deploy
+
+building-frontend:
+    stage: build 
+    tags:
+        - task-manager
+    script:
+        - cd frontend/
+        - docker build -t task-manager-frontend .
+
+building-backend:
+    stage: build 
+    tags:
+        - task-manager
+    script:
+        - cd backend/
+        - docker build -t task-manager-backend .
+
+publish:
+  stage: publish
+  tags:
+    - task-manager
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - docker tag task-manager-backend:latest "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"
+    - docker tag task-manager-frontend:latest "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
+    - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"
+    - docker push "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
+
+
+
+
+deploying-stage-using-docker-compose:
+    stage: deploy
+    tags:
+        -  task-manager
+    script:
+        - docker-compose down 
+        - docker-compose up -d
+
