@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { formatDueDate, PRIORITY_LABEL } from "../utils.js";
+import { formatDueDate, PRIORITY_LABEL, toDatetimeLocalValue, fromDatetimeLocalValue } from "../utils.js";
 
 const RAIL_COLORS = { low: "var(--low)", medium: "var(--medium)", high: "var(--high)" };
 
@@ -9,7 +9,7 @@ export default function TaskItem({ task, onToggle, onDelete, onSave }) {
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || "");
   const [priority, setPriority] = useState(task.priority || "medium");
-  const [dueDate, setDueDate] = useState(task.due_date ? task.due_date.slice(0, 10) : "");
+  const [dueDate, setDueDate] = useState(toDatetimeLocalValue(task.due_date));
   const [saving, setSaving] = useState(false);
 
   const due = formatDueDate(task.due_date);
@@ -18,7 +18,7 @@ export default function TaskItem({ task, onToggle, onDelete, onSave }) {
     setTitle(task.title);
     setDescription(task.description || "");
     setPriority(task.priority || "medium");
-    setDueDate(task.due_date ? task.due_date.slice(0, 10) : "");
+    setDueDate(toDatetimeLocalValue(task.due_date));
     setEditing(true);
   };
 
@@ -30,7 +30,7 @@ export default function TaskItem({ task, onToggle, onDelete, onSave }) {
         title: title.trim(),
         description: description.trim() || null,
         priority,
-        due_date: dueDate ? new Date(dueDate).toISOString() : null,
+        due_date: fromDatetimeLocalValue(dueDate),
       });
       setEditing(false);
     } finally {
@@ -125,7 +125,12 @@ export default function TaskItem({ task, onToggle, onDelete, onSave }) {
                 </button>
               ))}
             </div>
-            <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            <input
+              type="datetime-local"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              aria-label="Scheduled date and time"
+            />
           </div>
           <div className="edit-actions">
             <button className="btn btn-ghost" onClick={() => setEditing(false)}>

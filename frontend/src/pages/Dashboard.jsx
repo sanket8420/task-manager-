@@ -4,7 +4,7 @@ import api from "../api.js";
 import ThemeToggle from "../components/ThemeToggle.jsx";
 import TaskItem from "../components/TaskItem.jsx";
 import { useToast } from "../components/ToastContext.jsx";
-import { PRIORITY_ORDER } from "../utils.js";
+import { PRIORITY_ORDER, fromDatetimeLocalValue } from "../utils.js";
 
 const RAIL_COLORS = { low: "var(--low)", medium: "var(--medium)", high: "var(--high)" };
 
@@ -49,7 +49,7 @@ export default function Dashboard() {
       await api.post("/tasks/", {
         title: title.trim(),
         priority,
-        due_date: dueDate ? new Date(dueDate).toISOString() : null,
+        due_date: fromDatetimeLocalValue(dueDate),
       });
       setTitle("");
       setPriority("medium");
@@ -170,10 +170,10 @@ export default function Dashboard() {
             onChange={(e) => setTitle(e.target.value)}
           />
           <input
-            type="date"
+            type="datetime-local"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
-            aria-label="Due date"
+            aria-label="Scheduled date and time"
           />
         </div>
         <div className="composer-row" style={{ marginTop: 8, alignItems: "center" }}>
