@@ -12,6 +12,7 @@ stages:
     - publish
     - deploy
 
+#frontend-building 
 building-frontend:
     stage: build 
     tags:
