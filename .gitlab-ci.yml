@@ -43,12 +43,11 @@ publish:
 
 
 
-deploying-stage-using-docker-compose:
+deploying-stage-using-kubernetes:
     stage: deploy
     tags:
         -  control-plane-task-manager
     script:
-        - cd k8s
         - kubectl apply -f k8s/backend-deployment.yaml
         - kubectl apply -f k8s/backend-services.yaml
         - kubectl apply -f k8s/frontend-deployment.yaml
