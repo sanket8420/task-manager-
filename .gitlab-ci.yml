@@ -53,8 +53,8 @@ deploying-stage-using-kubernetes:
         - kubectl apply -f k8s/frontend-deployment.yaml
         - kubectl apply -f k8s/frontend-services.yaml
 
-        - kubectl set image deployment/backend-deployment backend="$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"
-        - kubectl set image deployment/frontend-deployment frontend="$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
+        - kubectl set image deployment/backend-deployment backend="$CI_REGISTRY_IMAGE/backend-container:$CI_COMMIT_SHORT_SHA"
+        - kubectl set image deployment/frontend-deployment frontend="$CI_REGISTRY_IMAGE/frontend-container:$CI_COMMIT_SHORT_SHA"
  
         - kubectl rollout restart deployment frontend-deployment
         - kubectl rollout restart deployment backend-deployment
