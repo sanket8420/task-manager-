@@ -1,22 +1,26 @@
 apiVersion: apps/v1
-kind: Deployment 
+kind: Deployment
+
 metadata:
   name: frontend-deployment
+
 spec:
-  replicas: 2 
+  replicas: 1
+
   selector:
     matchLabels:
       app: frontend
+
   template:
     metadata:
       labels:
         app: frontend
+
     spec:
-      imagePullSecrets:
-        - name: gitlab-registry-secret
       containers:
-        - name: frontend-container  
-          image: registry.gitlab.com/fineshift/users/sanket-jadhav/task-manager-project/frontend 
+        - name: frontend-container
+          image: sanketjadhav84/frontend-img:latest
           imagePullPolicy: Always
+
           ports:
             - containerPort: 80
