@@ -39,15 +39,25 @@ jobs:
           docker build -t sanketjadhav84/backend-img:${{ github.sha }} .
           docker push sanketjadhav84/backend-img:${{ github.sha }}
 
-  docker-compose:
+  deploy_to_ec2:
     runs-on: ubuntu-latest
     needs: [build_image_frontend, build_image_backend]
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Start containers
-        env:
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker compose down
-          docker compose up -d --build
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+
+          script: |
+            cd /home/ubuntu/task-manager
+
+            export IMAGE_TAG=${{ github.sha }}
+
+            docker compose pull
+            docker compose down
+            docker compose up -d
+
+            docker compose ps
