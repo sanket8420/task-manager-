@@ -11,14 +11,14 @@ services:
             - task-manager
     
     frontend:
-        image: task-manager-frontend
+        image: frontend-img
         ports:
             - "8081:80"
         networks:
             - task-manager
     
     backend:
-        image: task-manager-backend
+        image: backend-img
         ports:
             - "8000:8000"
         networks: 
