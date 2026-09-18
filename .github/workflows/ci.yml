@@ -46,6 +46,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Start containers
+        env:
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker compose down
           docker compose up -d --build
