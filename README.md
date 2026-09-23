@@ -1,117 +1,213 @@
-# Task Manager — Full-Stack App (React + FastAPI + PostgreSQL)
+# Task Manager
 
-A three-tier task management application with JWT authentication, built to
-demonstrate containerized full-stack development and CI/CD with GitLab.
+A full-stack task management application built with React, FastAPI, and PostgreSQL. The project demonstrates a containerized web app with authentication, task CRUD operations, and a Docker-based deployment setup.
+
+## Features
+
+- User registration and login
+- JWT-based authentication
+- Create, read, update, and delete tasks
+- Role-based access to user-owned task data
+- React frontend with protected routes
+- FastAPI backend with validation and OpenAPI docs
+- PostgreSQL database persistence
+- Docker Compose setup for local development
 
 ## Architecture
 
-```
-┌─────────────┐      /api/*       ┌─────────────┐      SQL      ┌──────────────┐
-│   React     │ ───────────────►  │   FastAPI   │ ─────────────► │  PostgreSQL  │
-│  (nginx)    │ ◄───────────────  │  (uvicorn)  │ ◄───────────── │              │
-│  port 80    │      JSON         │  port 8000  │                │  port 5432   │
-└─────────────┘                   └─────────────┘                └──────────────┘
+The application is organized into three main layers:
+
+- Frontend: React + Vite + Nginx
+- Backend: FastAPI + SQLAlchemy + JWT auth
+- Database: PostgreSQL
+
+```text
+Client Browser
+      │
+      ▼
+React Frontend (port 8081 or reverse-proxied in Docker)
+      │
+      ▼
+FastAPI Backend (port 8000)
+      │
+      ▼
+PostgreSQL Database (port 5432)
 ```
 
-- **Frontend**: React (Vite), served as a static build by nginx in production.
-  nginx also reverse-proxies `/api/*` to the backend container so the browser
-  only ever talks to one origin.
-- **Backend**: FastAPI, SQLAlchemy ORM, JWT auth (python-jose + passlib/bcrypt).
-- **Database**: PostgreSQL, schema created via SQLAlchemy models on startup.
-- **Orchestration**: Docker Compose ties all three services together for local
-  dev / single-host deployment.
-- **CI/CD**: `.gitlab-ci.yml` runs a build check on both services and pushes
-  Docker images to the GitLab Container Registry on every push to `main`.
+## Tech Stack
 
-## Project structure
+- Frontend: React, Vite, Axios, React Router
+- Backend: Python, FastAPI, SQLAlchemy, Pydantic, Passlib, python-jose
+- Database: PostgreSQL
+- Infrastructure: Docker, Docker Compose
+- CI/CD: GitLab CI
 
-```
+## Repository Structure
+
+```text
 task-manager/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py          # FastAPI app, CORS, router registration
-│   │   ├── config.py        # Settings (env vars)
-│   │   ├── database.py      # SQLAlchemy engine/session
-│   │   ├── models.py        # User, Task ORM models
-│   │   ├── schemas.py       # Pydantic request/response schemas
-│   │   ├── auth.py          # Password hashing, JWT create/verify
+│   │   ├── __init__.py
+│   │   ├── auth.py
+│   │   ├── config.py
+│   │   ├── database.py
+│   │   ├── main.py
+│   │   ├── models.py
+│   │   ├── schemas.py
 │   │   └── routers/
-│   │       ├── auth.py      # /api/auth/register, /login, /me
-│   │       └── tasks.py     # /api/tasks CRUD
-│   ├── requirements.txt
+│   │       ├── auth.py
+│   │       └── tasks.py
+│   ├── .env.example
 │   ├── Dockerfile
-│   └── .env.example
+│   ├── requirements.txt
+│   └── .venv/   # optional local virtual environment
 ├── frontend/
 │   ├── src/
-│   │   ├── pages/           # Login, Register, Dashboard
-│   │   ├── api.js           # Axios instance with JWT interceptor
-│   │   ├── App.jsx          # Routes + private route guard
-│   │   └── main.jsx
+│   ├── Dockerfile
+│   ├── index.html
+│   ├── nginx.conf
 │   ├── package.json
+│   ├── package-lock.json
 │   ├── vite.config.js
-│   ├── Dockerfile            # multi-stage: node build -> nginx serve
-│   └── nginx.conf
-├── docker-compose.yml
+│   └── .gitignore
+├── docker-compose.yaml
+├── .gitignore
 ├── .gitlab-ci.yml
-└── .gitignore
+├── changes.patch
+├── README.md
+└── k8s/
 ```
 
-## Running locally
+## Prerequisites
 
-    Requires Docker and Docker Compose.
+Before running the project locally, make sure you have:
+
+- Docker
+- Docker Compose
+- Git
+- Node.js (only if you want to run frontend locally outside Docker)
+- Python 3.11+ (only if you want to run backend locally outside Docker)
+
+## Local Development Setup
+
+### 1. Clone the repository
 
 ```bash
-git clone <your-gitlab-repo-url>
-cd task-manager
+git clone https://github.com/sanket8420/task-manager-.git
+cd task-manager-
+```
+
+### 2. Start the application with Docker Compose
+
+```bash
 docker compose up --build
 ```
 
-- Frontend: http://localhost
-- Backend API docs (Swagger): http://localhost:8000/docs
-- Postgres: localhost:5432 (user `taskuser` / pass `taskpass` / db `taskdb`)
+This will start:
 
-## API endpoints
+- Frontend: http://localhost:8081
+- Backend API docs: http://localhost:8000/docs
+- PostgreSQL database: localhost:5432
 
-| Method | Endpoint             | Auth required | Description          |
-|--------|-----------------------|:--------------:|-----------------------|
-| POST   | `/api/auth/register`  | No             | Create a new user     |
-| POST   | `/api/auth/login`     | No             | Get a JWT access token|
-| GET    | `/api/auth/me`        | Yes            | Current user info     |
-| GET    | `/api/tasks/`         | Yes            | List your tasks       |
-| POST   | `/api/tasks/`         | Yes            | Create a task         |
-| GET    | `/api/tasks/{id}`     | Yes            | Get one task          |
-| PUT    | `/api/tasks/{id}`     | Yes            | Update a task         |
-| DELETE | `/api/tasks/{id}`     | Yes            | Delete a task          |
+### 3. Stop the application
 
-## Deploying via GitLab
+```bash
+docker compose down
+```
 
-1. Push this project to a new GitLab repo.
-2. The included `.gitlab-ci.yml` automatically:
-   - Sanity-checks the backend (`py_compile`) and builds the frontend
-     (`npm run build`) on every push/MR.
-   - Builds and pushes `backend` and `frontend` Docker images to your
-     project's Container Registry (`registry.gitlab.com/<namespace>/<project>`)
-     on pushes to `main`. No extra config needed — GitLab provides
-     `CI_REGISTRY`, `CI_REGISTRY_USER`, and `CI_REGISTRY_PASSWORD` automatically.
-3. To actually deploy the pulled images to a server, uncomment and adapt the
-   `deploy` job at the bottom of `.gitlab-ci.yml` (SSH into your host and run
-   `docker compose pull && docker compose up -d`), or wire it into a
-   Kubernetes deploy step if you're pointing it at a cluster.
+To remove volumes as well:
 
-## Environment variables (backend)
+```bash
+docker compose down -v
+```
 
-Copy `backend/.env.example` to `backend/.env` for local (non-Docker) runs
-and adjust as needed. In Docker Compose these are already set inline in
-`docker-compose.yml` — for real deployments, move `SECRET_KEY` and DB
-credentials into CI/CD variables or a secrets manager rather than committing
-them.
+## Environment Variables
 
-## Notes / next steps
+The backend includes an example environment file at `backend/.env.example`.
 
-- Tables are created via `Base.metadata.create_all()` on backend startup —
-  fine for a demo; swap in Alembic migrations (already in requirements.txt)
-  before treating this as production-grade.
-- CORS is wide open (`allow_origins=["*"]`) — restrict it to your actual
-  frontend origin once deployed.
-- Add `backend/tests/` with pytest and wire it into `backend-test` in the
-  CI pipeline.
+Copy it as needed:
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Update values if you are running parts of the project outside Docker or customizing the setup.
+
+Default database configuration used by Docker Compose:
+
+- Database: `taskdb`
+- Username: `taskuser`
+- Password: `taskpass`
+- Host: `db`
+
+## API Endpoints
+
+The backend exposes REST API endpoints for authentication and task management.
+
+### Authentication
+
+- `POST /api/auth/register` – register a new user
+- `POST /api/auth/login` – log in and receive a JWT token
+- `GET /api/auth/me` – fetch current authenticated user details
+
+### Tasks
+
+- `GET /api/tasks/` – list tasks for the authenticated user
+- `POST /api/tasks/` – create a new task
+- `GET /api/tasks/{id}` – fetch one task
+- `PUT /api/tasks/{id}` – update a task
+- `DELETE /api/tasks/{id}` – delete a task
+
+## Frontend Overview
+
+The frontend is a React app created with Vite. It provides pages for:
+
+- Login
+- Registration
+- Dashboard
+- Task creation and task management
+
+Protected routes are enforced with client-side authentication checks through the app logic and token handling.
+
+## Backend Overview
+
+The backend is built with FastAPI and SQLAlchemy. It includes:
+
+- database models for users and tasks
+- Pydantic schemas for payload validation
+- hashing and JWT utilities for authentication
+- routers for auth and task operations
+
+The app automatically creates required tables at startup for the demo application.
+
+## CI/CD
+
+The repository includes a GitLab CI pipeline in `.gitlab-ci.yml` that helps validate the project by building the frontend and checking backend integrity. The pipeline is designed to support container image publishing for deployment workflows.
+
+## Notes
+
+This project is useful for learning or demonstrating:
+
+- full-stack application structure
+- containerized deployment
+- Docker networking and Compose orchestration
+- JWT-based authentication
+- API-driven frontend integration
+
+## License
+
+This project does not currently declare a license file. If you plan to share or distribute it publicly, consider adding an appropriate open-source license.
+
+## Contributing
+
+Contributions are welcome. If you want to improve the app, consider:
+
+- adding automated tests
+- adding Alembic migrations
+- tightening security for deployed environments
+- improving UI/UX and error handling
+
+---
+
+If you want, I can also help you create a more polished version of this README specifically for GitHub, including badges, screenshots, and a deployment section.
