@@ -12,7 +12,7 @@ jobs:
   # Build Frontend
   # =========================
   build_image_frontend:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout code
@@ -42,7 +42,7 @@ jobs:
   # Build Backend
   # =========================
   build_image_backend:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout code
@@ -72,34 +72,15 @@ jobs:
   # Deploy to EC2
   # =========================
   deploy_to_ec2:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     needs:
       - build_image_frontend
       - build_image_backend
 
     steps:
-
-      - name: Prepare SSH key
+      - name: Deploy
         run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > /tmp/ec2_key
-          chmod 600 /tmp/ec2_key
-
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key_path: /tmp/ec2_key
-          port: 22
-          debug: true
-
-          script: |
-            set -e
-
-            echo "Connected to EC2"
-            whoami
-            hostname
 
             cd /home/ubuntu/task-manager
 
