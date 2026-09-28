@@ -1,4 +1,4 @@
-name: Task-manager
+name: Task-manager-with-k8s
 
 on:
   push:
