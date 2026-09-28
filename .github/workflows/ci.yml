@@ -82,7 +82,7 @@ jobs:
       - name: Deploy
         run: |
 
-            cd -p /home/ubuntu/task-manager
+            cd /home/ubuntu/task-manager
 
             export IMAGE_TAG=${{ github.sha }}
 
